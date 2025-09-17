@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Volta do Yan • Contador</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Fonte opcional -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      /* Paleta Monuv */
+      --mono-bg-1:#202225; --mono-bg-2:#2F3237; --mono-bg-3:#42464C;
+      --mono-primary:#4573D9; --mono-text:#EAECEF; --mono-muted:#A9AFB7;
+      /* Acentos para o confete */
+      --accent-fun-1:#FFCC00; --accent-fun-2:#FF5A5A; --accent-fun-3:#38D9A9;
+    }
+    html, body{
+      height:100%;
+      background:
+        radial-gradient(1200px 1200px at 80% -10%, rgba(69,115,217,.12), transparent 60%),
+        radial-gradient(1200px 1200px at -10% 120%, rgba(69,115,217,.08), transparent 60%),
+        var(--mono-bg-1);
+      color:var(--mono-text);
+      font-family:'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    }
+    .wrap{min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px;}
+    .card-minimal{
+      background:linear-gradient(180deg, var(--mono-bg-2), #272a2f);
+      border:1px solid var(--mono-bg-3); border-radius:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+    .brand-dot{width:10px; height:10px; border-radius:999px; background:var(--mono-primary); margin-right:8px;
+      box-shadow:0 0 0 4px rgba(69,115,217,.15); display:inline-block;}
+    .days-big{font-size:clamp(40px, 8vw, 84px); font-weight:800; line-height:1; letter-spacing:-.02em;
+      text-shadow:0 4px 24px rgba(69,115,217,.28);}
+    .subline{color:var(--mono-muted);}
+    .progress{background-color:rgba(255,255,255,.06); height:10px; border-radius:999px;}
+    .progress-bar{background:linear-gradient(90deg, var(--mono-primary), #5d8cff);}
+    .chip{background:rgba(255,255,255,.06); color:var(--mono-text); border:1px solid var(--mono-bg-3);
+      border-radius:999px; padding:6px 12px; font-size:.9rem;}
+    .live-dot{width:8px; height:8px; border-radius:999px; background:var(--mono-primary); display:inline-block; margin-right:8px;
+      animation:pulse 1.5s infinite;}
+    @keyframes pulse{
+      0%{box-shadow:0 0 0 0 rgba(69,115,217,.6)}
+      70%{box-shadow:0 0 0 8px rgba(69,115,217,0)}
+      100%{box-shadow:0 0 0 0 rgba(69,115,217,0)}
+    }
+    .time-chunks{font-weight:600; letter-spacing:.02em;}
+    .time-chunks span{display:inline-block; min-width:2ch; text-align:center;}
+
+    /* Banner Beto Carrero fixo */
+    .beto-banner{
+      border:1px dashed rgba(255,255,255,.12);
+      border-radius:14px; padding:10px 14px; margin-bottom:12px;
+      background:linear-gradient(90deg, rgba(255,204,0,.15), rgba(255,90,90,.12), rgba(56,217,169,.12)), rgba(255,255,255,.02);
+      display:flex; align-items:center; gap:10px;
+    }
+    .beto-badge{ display:inline-flex; align-items:center; gap:8px; font-weight:700; }
+    .beto-emoji{ font-size:20px; filter: drop-shadow(0 2px 8px rgba(0,0,0,.35)); }
+
+    /* Confete */
+    .confetti{ position:fixed; top:-10px; width:10px; height:14px; opacity:.9; pointer-events:none;
+      animation:fall linear forwards; border-radius:3px; }
+    @keyframes fall{
+      to{ transform:translateY(110vh) rotate(720deg); opacity:1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="container" style="max-width:860px;">
+      <div class="card card-minimal p-4 p-md-5">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="brand-dot" aria-hidden="true"></span>
+            <h1 class="h5 m-0 fw-bold">Volta do Yan</h1>
+          </div>
+          <span class="chip d-flex align-items-center">
+            <span class="live-dot" aria-hidden="true"></span>
+            Ao vivo
+          </span>
+        </div>
+
+        <!-- Card colorido fixo -->
+        <div class="beto-banner" role="status" aria-live="polite">
+          <span class="beto-emoji">🤠</span>
+          <div class="beto-badge">Modo Beto Carrero ativado!</div>
+        </div>
+
+        <!-- CONTADOR AO VIVO -->
+        <div class="text-center my-3">
+          <div class="subline mb-2" id="headline">Faltam</div>
+          <div class="days-big">
+            <span id="dNum">—</span> <small class="subline" style="font-weight:600">dias</small>
+          </div>
+          <div class="h3 mt-2 time-chunks" aria-live="polite" aria-atomic="true">
+            <span id="hNum">--</span>:<span id="mNum">--</span>:<span id="sNum">--</span>
+          </div>
+        </div>
+
+        <!-- PROGRESSO CONTÍNUO -->
+        <div class="mt-3">
+          <div class="d-flex justify-content-between mb-2 small subline">
+            <span>Progresso</span>
+            <span><span id="pctText">0</span>%</span>
+          </div>
+          <div class="progress" role="progressbar" aria-label="Progresso das férias do Yan" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" id="progressBar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- CHIPS DE DATAS -->
+        <div class="row g-3 mt-4">
+          <div class="col-12 col-md-6">
+            <div class="chip w-100 d-flex justify-content-between">
+              <span>Início</span>
+              <strong id="startDateLabel">17/09/2025 00:00</strong>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="chip w-100 d-flex justify-content-between">
+              <span>Retorno</span>
+              <strong id="returnDateLabel">03/10/2025 00:00</strong>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" style="border-color: rgba(255,255,255,0.08);" />
+        <div class="subline">Feito com 💙</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ====== Configuração (timezone São Paulo) ======
+    const tz = 'America/Sao_Paulo';
+    // Período: 17/09/2025 00:00 até 03/10/2025 00:00
+    const startISO = '2025-09-17T00:00:00-03:00';
+    const endISO   = '2025-10-03T00:00:00-03:00';
+
+    const startDate = new Date(startISO);
+    const endDate   = new Date(endISO);
+
+    // ====== Elementos ======
+    const startDateLabel = document.getElementById('startDateLabel');
+    const returnDateLabel= document.getElementById('returnDateLabel');
+    const dNum = document.getElementById('dNum');
+    const hNum = document.getElementById('hNum');
+    const mNum = document.getElementById('mNum');
+    const sNum = document.getElementById('sNum');
+    const progressBar = document.getElementById('progressBar');
+    const pctText = document.getElementById('pctText');
+    const headline = document.getElementById('headline');
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function fmtDateTimeBR(date){
+      return date.toLocaleString('pt-BR', {
+        timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit',
+        hour:'2-digit', minute:'2-digit'
+      }).replace(',', '');
+    }
+
+    function updateStaticLabels(){
+      startDateLabel.textContent  = fmtDateTimeBR(startDate);
+      returnDateLabel.textContent = fmtDateTimeBR(endDate);
+    }
+
+    // ====== Confete ======
+    function launchConfetti(count=100){
+      for (let i=0; i<count; i++){
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random()*100 + 'vw';
+        c.style.background = [ 'var(--accent-fun-1)','var(--accent-fun-2)','var(--accent-fun-3)','var(--mono-primary)'][i%4];
+        c.style.transform = `translateY(-10px) rotate(${Math.random()*360}deg)`;
+        c.style.animationDuration = (4 + Math.random()*2) + 's';
+        c.style.animationDelay = (Math.random()*0.4) + 's';
+        document.body.appendChild(c);
+        setTimeout(()=> c.remove(), 7000);
+      }
+    }
+
+    // ====== Contador ao vivo + progresso ======
+    function tick(){
+      const now = new Date();
+
+      let diff = Math.floor((endDate - now) / 1000);
+      if (diff < 0) diff = 0;
+
+      const days = Math.floor(diff / 86400);
+      const hours = Math.floor((diff % 86400) / 3600);
+      const minutes = Math.floor((diff % 3600) / 60);
+      const seconds = diff % 60;
+
+      dNum.textContent = days;
+      hNum.textContent = pad(hours);
+      mNum.textContent = pad(minutes);
+      sNum.textContent = pad(seconds);
+
+      // Progresso contínuo
+      const totalMs = Math.max(1, endDate - startDate);
+      const elapsedMs = Math.min(Math.max(0, now - startDate), totalMs);
+      const pct = Math.round((elapsedMs / totalMs) * 100);
+      pctText.textContent = pct;
+      progressBar.style.width = pct + '%';
+
+      if (diff === 0){
+        headline.textContent = 'Chegou o dia! 🎉';
+      }
+    }
+
+    // Inicializa
+    updateStaticLabels();
+    tick();                        // primeira render
+    setInterval(tick, 1000);       // atualização por segundo
+    launchConfetti(120);           // confete ao carregar
+  </script>
+</body>
+</html>
